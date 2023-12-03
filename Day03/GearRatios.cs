@@ -1,3 +1,6 @@
+using System.Configuration.Assemblies;
+using System.Drawing;
+
 namespace AdventOfCode2023.Day03;
 
 public class GearRatios : ChallengeBase<int>
@@ -7,6 +10,46 @@ public class GearRatios : ChallengeBase<int>
     }
 
     protected override int Part1()
+        => GetNumberPoints()
+            .Where(IsAdjacentToSymbol)
+            .Sum(c => c.Value);
+
+    protected override int Part2()
+    {
+        var numberCoordinates = GetNumberPoints();
+        var gearCoordinates = GetGearCoordinates();
+
+        var answer = 0;
+
+        foreach (var gear in gearCoordinates)
+        {
+            var nearbyNumbers = numberCoordinates
+                .Where(np => HasGearOnSameLine(np, gear) || HasGearOnLineAbove(np, gear) || HasGearOnLineBelow(np, gear))
+                .Select(np => np.Value)
+                .ToList();
+
+            if (nearbyNumbers.Count() == 2)
+            {
+                answer += nearbyNumbers[0] * nearbyNumbers[1];
+            }
+        }
+
+        return answer;
+    }
+
+    private static bool HasGearOnSameLine(NumberPoint np, Point p) 
+        => np.Y == p.Y && (np.EndX == p.X - 1 || np.StartX == p.X + 1);
+
+    private static bool HasGearOnLineAbove(NumberPoint np, Point p) 
+        => np.Y == p.Y - 1 && IsGearAdjacent(np, p);
+
+    private static bool HasGearOnLineBelow(NumberPoint np, Point p) 
+        => np.Y == p.Y + 1 && IsGearAdjacent(np, p);
+
+    private static bool IsGearAdjacent(NumberPoint np, Point p) => 
+        np.EndX == p.X - 1 || np.EndX == p.X || np.EndX == p.X + 1 || np.StartX == p.X - 1 || np.StartX == p.X || np.StartX == p.X + 1;
+
+    private HashSet<NumberPoint> GetNumberPoints()
     {
         var coordinates = new HashSet<NumberPoint>();
 
@@ -33,11 +76,25 @@ public class GearRatios : ChallengeBase<int>
             }
         }
 
-        var answer = coordinates
-            .Where(IsAdjacentToSymbol)
-            .Sum(c => c.Value);
+        return coordinates;
+    }
 
-           return answer;
+    private HashSet<Point> GetGearCoordinates()
+    {
+        var results = new HashSet<Point>();
+
+        for (var y = 0; y < ChallengeDataRows.Count(); y++)
+        {
+            for (var x = 0; x < ChallengeDataRows[y].Length; x++)
+            {
+                if (ChallengeDataRows[y][x] == '*')
+                {
+                    results.Add(new Point(x, y));
+                }
+            }
+        }
+
+        return results;
     }
 
     private bool IsAdjacentToSymbol(NumberPoint point)
@@ -58,8 +115,6 @@ public class GearRatios : ChallengeBase<int>
 
         return false;
     }
-    
-    protected override int Part2() => 0;
 
     private static bool IsNumber(char c) => int.TryParse(c.ToString(), out var _);
 }
