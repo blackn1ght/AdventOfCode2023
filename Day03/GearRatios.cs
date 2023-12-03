@@ -1,6 +1,3 @@
-using System.Drawing;
-using System.Reflection;
-
 namespace AdventOfCode2023.Day03;
 
 public class GearRatios : ChallengeBase<int>
@@ -40,7 +37,7 @@ public class GearRatios : ChallengeBase<int>
             .Where(IsAdjacentToSymbol)
             .Sum(c => c.Value);
 
-        return answer;
+           return answer;
     }
 
     private bool IsAdjacentToSymbol(NumberPoint point)
