@@ -1,4 +1,3 @@
-using System.Configuration.Assemblies;
 using System.Drawing;
 
 namespace AdventOfCode2023.Day03;
@@ -24,7 +23,7 @@ public class GearRatios : ChallengeBase<int>
         foreach (var gear in gearCoordinates)
         {
             var nearbyNumbers = numberCoordinates
-                .Where(np => HasGearOnSameLine(np, gear) || HasGearOnLineAbove(np, gear) || HasGearOnLineBelow(np, gear))
+                .Where(np => HasNumberOnSameLine(np, gear) || HasNumberOnLineAbove(np, gear) || HasNumberOnLineBelow(np, gear))
                 .Select(np => np.Value)
                 .ToList();
 
@@ -37,16 +36,16 @@ public class GearRatios : ChallengeBase<int>
         return answer;
     }
 
-    private static bool HasGearOnSameLine(NumberPoint np, Point p) 
+    private static bool HasNumberOnSameLine(NumberPoint np, Point p) 
         => np.Y == p.Y && (np.EndX == p.X - 1 || np.StartX == p.X + 1);
 
-    private static bool HasGearOnLineAbove(NumberPoint np, Point p) 
-        => np.Y == p.Y - 1 && IsGearAdjacent(np, p);
+    private static bool HasNumberOnLineAbove(NumberPoint np, Point p) 
+        => np.Y == p.Y - 1 && IsNumberAdjacentToGear(np, p);
 
-    private static bool HasGearOnLineBelow(NumberPoint np, Point p) 
-        => np.Y == p.Y + 1 && IsGearAdjacent(np, p);
+    private static bool HasNumberOnLineBelow(NumberPoint np, Point p) 
+        => np.Y == p.Y + 1 && IsNumberAdjacentToGear(np, p);
 
-    private static bool IsGearAdjacent(NumberPoint np, Point p) => 
+    private static bool IsNumberAdjacentToGear(NumberPoint np, Point p) => 
         np.EndX == p.X - 1 || np.EndX == p.X || np.EndX == p.X + 1 || np.StartX == p.X - 1 || np.StartX == p.X || np.StartX == p.X + 1;
 
     private HashSet<NumberPoint> GetNumberPoints()
