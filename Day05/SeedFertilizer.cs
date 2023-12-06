@@ -33,23 +33,30 @@ public class SeedFertilizer : ChallengeBase<long>
         return endLocations.Min();
     }
 
+    private bool IsSameRange(LongRange thisRange, LongRange otherRange)
+        => thisRange.Start == otherRange.Start && thisRange.End == otherRange.End;
+
+    private bool OverlapsStart(LongRange thisRrange, LongRange otherRange)
+        => otherRange.Start < thisRrange.Start && otherRange.End < thisRrange.End && otherRange.End > thisRrange.Start;
+
+            // 4, 8 seedRange
+            // 5, 10 others
+    private bool OverlapsEnd(LongRange thisRange, LongRange otherRange)
+        => otherRange.Start > thisRange.Start && otherRange.Start < thisRange.End && otherRange.End > thisRange.End;
+    
+
     protected override long Part2()
     {
-        var seeds = _seed
+        var seedRanges = _seed
             .Chunk(2)
             .Select(chnk => new LongRange(chnk[0], chnk[0] + chnk[1]-1));
 
+        long? result = null;
 
-
-        var cache = new ConcurrentDictionary<long, long>();
-
-        // check if any number ranges overlap to reduce multiple runs
-        foreach (var seedRange in seeds)
+        Parallel.ForEach(seedRanges, seedRange =>
         {
             for (var seed = seedRange.Start; seed <= seedRange.End; seed++)
             {
-                if (cache.ContainsKey(seed)) continue;
-
                 long nextValue = seed;
 
                 foreach (var mappings in _allMappings)
@@ -58,11 +65,18 @@ public class SeedFertilizer : ChallengeBase<long>
                     nextValue = mapping is not null ? nextValue + (mapping.Destination.Start - mapping.Source.Start) : nextValue;
                 }
 
-                cache.TryAdd(seed, nextValue);
+                if (result == null) 
+                {
+                    result = nextValue;
+                } 
+                else if (result > nextValue)
+                {
+                    result = nextValue;
+                }
             }
-        }
+        });
 
-        return cache.Values.Min();
+        return result!.Value;
     }
 
     private IEnumerable<long> GetSeedNumbers()
